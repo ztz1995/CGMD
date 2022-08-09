@@ -1,6 +1,8 @@
 # CGMD
 My python library for IBI force field construction and MD analysis.
 
+Data structures and core algorithms are saved in pyMD folder.
+
 ## Cite
 Please cite
 
