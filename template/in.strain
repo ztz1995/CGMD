@@ -1,0 +1,28 @@
+
+##############################################
+# Initialization
+
+log             gen.log
+units           real
+atom_style      molecular
+boundary        p p p 
+
+##############################################
+# Forcefield parameters
+read_data       ${data_name}
+read_dump       ${trj_name} ${trj_step} x y z ix iy iz vx vy vz box yes replace yes scaled yes
+
+include         potential.param
+
+neigh_modify    delay 0 every 1 check yes
+
+##############################################
+# Stress
+fix             1 all npt temp 300 300 50 y 1 1 1000 z 1 1 1000 drag 2
+fix             2 all deform 1 x erate ${srate} units box remap x
+
+dump            1 all custom ${devery} lammpstrj.* id xs ys zs ix iy iz vx vy vz
+thermo_style    custom step temp pxx pyy pzz lx ly lz epair ebond eangle edihed
+thermo          1
+timestep        1
+run             ${steps}

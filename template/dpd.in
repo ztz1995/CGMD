@@ -1,0 +1,73 @@
+
+# DPD to real
+# energy epsilon = 0.59584 kcal/mol
+# distance sigma = 5.92 Angstrom
+# mass m = 69.9 g/mol
+# Temperature T = 300 K
+# time t = 983.91 fs
+# force f = energy / distance = 0.10065 kcal/mole/Angstrom
+# sigma force * time^0.5 = 3.1571
+
+pair_style      dpd/fdt 300.0 15.000 245455
+pair_coeff      1  1  0.993067  5.950071 # Es Es
+pair_coeff      1  2  1.171024  5.950071 # Es Me
+pair_coeff      1  3  1.171024  5.950071 # Es Ph
+pair_coeff      1  4  0.993067  5.950071 # Es TO(1)
+pair_coeff      1  5  0.993067  5.950071 # Es TO(2)
+pair_coeff      1  6  3.620721  5.950071 # Es U
+pair_coeff      2  2  0.993067  5.950071 # Me Me
+pair_coeff      2  3  0.993067  5.950071 # Me Ph
+pair_coeff      2  4  1.171024  5.950071 # Me TO(1)
+pair_coeff      2  5  1.171024  5.950071 # Me TO(2)
+pair_coeff      2  6  2.189911  5.950071 # Me U
+pair_coeff      3  3  0.993067  5.950071 # Ph Ph
+pair_coeff      3  4  1.171024  5.950071 # Ph TO(1)
+pair_coeff      3  5  1.171024  5.950071 # Ph TO(2)
+pair_coeff      3  6  2.189911  5.950071 # Ph U
+pair_coeff      4  4  0.993067  5.950071 # TO(1) TO(1)
+pair_coeff      4  5  0.993067  5.950071 # TO(1) TO(2)
+# pair_coeff      4  6  3.620721  5.950071 # TO(1) U
+# pair_coeff      5  6  3.620721  5.950071 # TO(2) U
+pair_coeff      4  6  3.020721  5.950071 # TO(1) U
+pair_coeff      5  6  3.020721  5.950071 # TO(2) U
+
+pair_coeff      5  5  0.993067  5.950071 # TO(2) TO(2)
+# pair_coeff      5  6  2.620721  5.950071 # TO(2) U
+pair_coeff      6  6  0.993067  5.950071 # U U
+
+comm_modify     vel yes
+neigh_modify    delay 0 every 1 check yes
+thermo_style    custom step temp press ke pe epair ebond eangle edihed vol
+thermo          500
+
+# read_restart  0.restart
+##############################################
+# running on NVE
+variable        len equal 48.965678
+change_box      all x final 0 ${len} y final 0 ${len} z final 0 ${len} remap units box
+velocity        all create 300.0 1234
+
+fix             1 all nve
+
+timestep        0.1
+run             10000
+
+timestep        1
+run             10000
+
+timestep        5
+run             10000
+
+timestep        10
+run             10000
+
+reset_timestep  0
+timestep        10
+shell           mkdir trj
+dump            1 all custom 200 trj/300K.lammpstrj.* id xs ys zs ix iy iz vx vy vz
+run             200000
+# undump          1
+
+##############################################
+# finish
+write_restart   finish.restart
